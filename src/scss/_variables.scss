@@ -18,8 +18,12 @@ $color-text: $deep-dark-accent;
 }
 
 // Font
-$default-font-list: "Noto Serif SC", serif;
-$ui-font-list: "Quicksand", "Noto Serif SC", sans-serif;
+// $default-font-list: "Noto Serif SC", serif;
+$default-font-list: serif;
+
+// $ui-font-list: "Quicksand", "Noto Serif SC", sans-serif;
+$ui-font-list: sans-serif;
+
 
 $h1-size: 30px;
 $h-diff: 3px;

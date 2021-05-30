@@ -1,65 +1,35 @@
-import * as React from "react"
-import { Link, graphql } from "gatsby"
-
-import Bio from "../components/bio"
 import Layout from "../components/layout"
-import Seo from "../components/seo"
+import Main from "../components/main"
+import MyGitalk from "../components/gitalk"
+import Pagination from "../components/pagination"
+import Post from "../components/post"
+import React from "react"
+import Sidebar from "../components/sidebar"
+import { graphql } from "gatsby"
 
-const BlogPostTemplate = ({ data, location }) => {
+const BlogPostTemplate = ({ data, pageContext }) => {
   const post = data.markdownRemark
-  const siteTitle = data.site.siteMetadata?.title || `Title`
-  const { previous, next } = data
+  const { previous, next } = pageContext
 
   return (
-    <Layout location={location} title={siteTitle}>
-      <Seo
-        title={post.frontmatter.title}
-        description={post.frontmatter.description || post.excerpt}
-      />
-      <article
-        className="blog-post"
-        itemScope
-        itemType="http://schema.org/Article"
-      >
-        <header>
-          <h1 itemProp="headline">{post.frontmatter.title}</h1>
-          <p>{post.frontmatter.date}</p>
-        </header>
-        <section
-          dangerouslySetInnerHTML={{ __html: post.html }}
-          itemProp="articleBody"
+    <Layout
+      title={post.frontmatter.title}
+      description={post.frontmatter.description || post.excerpt}
+      socialImage={post.frontmatter.image}
+    >
+      <Sidebar toc={post.tableOfContents} />
+      <Main>
+        <Post post={post} />
+        <Pagination
+          prevLink={previous && previous.fields.slug}
+          prevText={previous && "← " + previous.frontmatter.title}
+          nextLink={next && next.fields.slug}
+          nextText={next && next.frontmatter.title + " →"}
         />
-        <hr />
-        <footer>
-          <Bio />
-        </footer>
-      </article>
-      <nav className="blog-post-nav">
-        <ul
-          style={{
-            display: `flex`,
-            flexWrap: `wrap`,
-            justifyContent: `space-between`,
-            listStyle: `none`,
-            padding: 0,
-          }}
-        >
-          <li>
-            {previous && (
-              <Link to={previous.fields.slug} rel="prev">
-                ← {previous.frontmatter.title}
-              </Link>
-            )}
-          </li>
-          <li>
-            {next && (
-              <Link to={next.fields.slug} rel="next">
-                {next.frontmatter.title} →
-              </Link>
-            )}
-          </li>
-        </ul>
-      </nav>
+        {!post.frontmatter.noComments && (
+          <MyGitalk id={pageContext.slug} title={post.frontmatter.title} />
+        )}
+      </Main>
     </Layout>
   )
 }
@@ -67,40 +37,20 @@ const BlogPostTemplate = ({ data, location }) => {
 export default BlogPostTemplate
 
 export const pageQuery = graphql`
-  query BlogPostBySlug(
-    $id: String!
-    $previousPostId: String
-    $nextPostId: String
-  ) {
-    site {
-      siteMetadata {
-        title
-      }
-    }
-    markdownRemark(id: { eq: $id }) {
-      id
+  query BlogPostBySlug($slug: String!, $dateFormat: String) {
+    markdownRemark(fields: { slug: { eq: $slug } }) {
       excerpt(pruneLength: 160)
       html
+      tableOfContents(absolute: false, maxDepth: 3)
+      fields {
+        date(formatString: $dateFormat)
+      }
       frontmatter {
         title
-        date(formatString: "MMMM DD, YYYY")
         description
-      }
-    }
-    previous: markdownRemark(id: { eq: $previousPostId }) {
-      fields {
-        slug
-      }
-      frontmatter {
-        title
-      }
-    }
-    next: markdownRemark(id: { eq: $nextPostId }) {
-      fields {
-        slug
-      }
-      frontmatter {
-        title
+        tags
+        image
+        noComments
       }
     }
   }

@@ -1,30 +1,36 @@
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Starter Blog`,
-    author: {
-      name: `Kyle Mathews`,
-      summary: `who lives and works in San Francisco building useful things.`,
-    },
-    description: `A starter blog demonstrating what Gatsby can do.`,
-    siteUrl: `https://gatsbystarterblogsource.gatsbyjs.io/`,
+    title: `无辄的栈`,
+    image: "https://pic.imwzk.com/author.jpg",
+    description: `Keith Null's Blog`,
+    siteUrl: `https://www.imwzk.com`,
     social: {
-      twitter: `kylemathews`,
+      douban: "keith1",
+      email: "hi@imwzk.com",
+      facebook: "",
+      github: "keithnull",
+      instagram: "",
+      linkedin: "",
+      rss: "/feed.xml",
+      telegram: "",
+      twitter: "_keithnull",
+      youtube: "",
     },
+    sidebarMenu: [
+      { url: "/archive/", label: "归档" },
+      { url: "/tags/", label: "标签" },
+      { url: "/about/", label: "About" },
+    ],
+    footerHTML: `<a href="https://beian.miit.gov.cn/">赣 ICP 备 19012492 号</a><br/>© 2017 - 2021 <a href="https://github.com/keithnull">Keith Null</a> All rights reserved.`,
+    dateFormat: `YYYY-MM-DD`,
+    language: `zh`,
   },
   plugins: [
-    `gatsby-plugin-image`,
     {
       resolve: `gatsby-source-filesystem`,
       options: {
-        path: `${__dirname}/content/blog`,
-        name: `blog`,
-      },
-    },
-    {
-      resolve: `gatsby-source-filesystem`,
-      options: {
-        name: `images`,
-        path: `${__dirname}/src/images`,
+        path: `${__dirname}/content`,
+        name: `content`,
       },
     },
     {
@@ -34,7 +40,7 @@ module.exports = {
           {
             resolve: `gatsby-remark-images`,
             options: {
-              maxWidth: 630,
+              maxWidth: 590,
             },
           },
           {
@@ -43,20 +49,35 @@ module.exports = {
               wrapperStyle: `margin-bottom: 1.0725rem`,
             },
           },
+          `gatsby-remark-autolink-headers`,
           `gatsby-remark-prismjs`,
           `gatsby-remark-copy-linked-files`,
           `gatsby-remark-smartypants`,
+          {
+            resolve: `gatsby-remark-classes`,
+            options: {
+              classMap: {
+                table: "table table-hover",
+              },
+            },
+          },
         ],
       },
     },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
-    // {
-    //   resolve: `gatsby-plugin-google-analytics`,
-    //   options: {
-    //     trackingId: `ADD YOUR TRACKING ID HERE`,
-    //   },
-    // },
+    {
+      resolve: `gatsby-plugin-google-analytics`,
+      options: {
+        trackingId: `UA-118116525-1`,
+      },
+    },
+    {
+     resolve: `gatsby-plugin-plausible`,
+     options: {
+       domain: `imwzk.com`,
+     },
+   },
     {
       resolve: `gatsby-plugin-feed`,
       options: {
@@ -75,54 +96,90 @@ module.exports = {
         feeds: [
           {
             serialize: ({ query: { site, allMarkdownRemark } }) => {
-              return allMarkdownRemark.nodes.map(node => {
-                return Object.assign({}, node.frontmatter, {
-                  description: node.excerpt,
-                  date: node.frontmatter.date,
-                  url: site.siteMetadata.siteUrl + node.fields.slug,
-                  guid: site.siteMetadata.siteUrl + node.fields.slug,
-                  custom_elements: [{ "content:encoded": node.html }],
+              return allMarkdownRemark.edges.map(edge => {
+                return Object.assign({}, edge.node.frontmatter, {
+                  title: edge.node.frontmatter.title,
+                  description:
+                    edge.node.frontmatter.description || edge.node.excerpt,
+                  date: edge.node.fields.date,
+                  url: site.siteMetadata.siteUrl + edge.node.fields.slug,
+                  guid: site.siteMetadata.siteUrl + edge.node.fields.slug,
+                  custom_elements: [{ "content:encoded": edge.node.html }],
                 })
               })
             },
             query: `
               {
                 allMarkdownRemark(
-                  sort: { order: DESC, fields: [frontmatter___date] },
+                  sort: { order: DESC, fields: [fields___date] },
+                  filter: {frontmatter: {layout: {ne: "page"}}},
                 ) {
-                  nodes {
-                    excerpt
-                    html
-                    fields {
-                      slug
-                    }
-                    frontmatter {
-                      title
-                      date
+                  edges {
+                    node {
+                      excerpt
+                      html
+                      fields { 
+                        slug 
+                        date
+                      }
+                      frontmatter {
+                        title
+                        description
+                      }
                     }
                   }
                 }
               }
             `,
-            output: "/rss.xml",
+            output: "/feed.xml",
+            title: "无辄的栈",
           },
         ],
       },
     },
+    `gatsby-plugin-sitemap`,
     {
       resolve: `gatsby-plugin-manifest`,
       options: {
-        name: `Gatsby Starter Blog`,
-        short_name: `GatsbyJS`,
+        name: `无辄的栈`,
+        short_name: `无辄`,
         start_url: `/`,
         background_color: `#ffffff`,
-        theme_color: `#663399`,
+        theme_color: `#177682`,
         display: `minimal-ui`,
-        icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.
+        icon: `static/tree.png`,
       },
     },
     `gatsby-plugin-react-helmet`,
-    `gatsby-plugin-gatsby-cloud`,
+    `gatsby-plugin-sass`,
+    {
+      resolve: `gatsby-plugin-google-fonts`,
+      options: {
+        fonts: [`Quicksand`, `Noto Serif SC`],
+        display: "swap",
+      },
+    },
+    {
+      resolve: `gatsby-plugin-gitalk`,
+      options: {
+        config: {
+          clientID: "541b66df2ca4fba90b0c",
+          clientSecret: "157f686855f29762873e8ce11e056f7397c58209",
+          repo: "blog",
+          owner: "keithnull",
+          admin: ["keithnull"],
+          pagerDirection: "first",
+          createIssueManually: true,
+          distractionFreeMode: false,
+          enableHotKey: true,
+          // fix CORS errors
+          proxy:
+            "https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token",
+        },
+      },
+    },
+    "gatsby-redirect-from",
+    "gatsby-plugin-meta-redirect", // make sure this is always the last one
     // this (optional) plugin enables Progressive Web App + Offline functionality
     // To learn more, visit: https://gatsby.dev/offline
     // `gatsby-plugin-offline`,

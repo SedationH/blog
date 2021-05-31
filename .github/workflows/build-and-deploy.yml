@@ -29,6 +29,9 @@ jobs:
           node-version: "v14.17.0"
           
       - run: npm install
+
+      - run: npm get
+
       - run: npm run build
 
       - name: Deploy to Server
